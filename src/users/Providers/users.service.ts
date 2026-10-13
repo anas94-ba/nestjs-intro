@@ -1,4 +1,4 @@
-import { Injectable,Inject,forwardRef } from '@nestjs/common';
+import { Injectable,Inject,forwardRef, RequestTimeoutException, BadRequestException } from '@nestjs/common';
 import { GetUsersParamDto } from '../dtos/get-users-params.dto.js';
 import { AuthService } from '../../auth/providers/auth.service.js';
 import { User } from '../user.entity.js';
@@ -7,6 +7,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from '../dtos/create-user.dto.js';
 import * as config from '@nestjs/config';
 import profileConfig from '../config/profile.config.js';
+import { PatchPostDto } from '../../posts/dtos/patch-post.dto.js';
+import { PatchUserDto } from '../dtos/patch-user.dto.js';
 
 /**
  * The UsersService class is responsible for handling user-related operations in the application. It provides methods to retrieve all users, find a user by ID, and search for users based on a text query. The service also interacts with the AuthService to check authentication status when searching for users.
@@ -33,10 +35,36 @@ export class UsersService {
     }
 
     public async createUser(createUserDto:CreateUserDto){
-        const existUser=await this.usersRepository.findOne({where:{email:createUserDto.email}});
+        let existingUser = undefined;
 
+        try{
+           existingUser=await this.usersRepository.findOne({where:{email:createUserDto.email}});
+        }catch(error){
+            throw new RequestTimeoutException(
+                "Unable to connect to database ,please try in another time",
+                {
+                    description:"unable to connect to db"
+                }
+            )
+        }
+        if(existingUser){
+            throw new BadRequestException(
+                "User already exist please,check your email"
+            );
+        }
         let newUser=this.usersRepository.create(createUserDto);
-        newUser=await this.usersRepository.save(newUser);
+        try{
+            newUser=await this.usersRepository.save(newUser);
+
+        }catch(error){
+            throw new RequestTimeoutException(
+                "Unable to connect to database ,please try in another time",
+                 {
+                    description:"unable to connect to db"
+                }
+            )
+        }
+        
         return newUser;
 
     }
@@ -64,6 +92,7 @@ export class UsersService {
      */
 
     public findOneById(getUsersParamDto :GetUsersParamDto,limit :number,page:number){
+        
         return[
             {
                 first_name:"anas",
