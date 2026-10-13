@@ -5,6 +5,8 @@ import { User } from '../user.entity.js';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from '../dtos/create-user.dto.js';
+import * as config from '@nestjs/config';
+import profileConfig from '../config/profile.config.js';
 
 /**
  * The UsersService class is responsible for handling user-related operations in the application. It provides methods to retrieve all users, find a user by ID, and search for users based on a text query. The service also interacts with the AuthService to check authentication status when searching for users.
@@ -20,7 +22,12 @@ export class UsersService {
         @Inject(forwardRef(()=>AuthService))
         private readonly authService:AuthService,
         @InjectRepository(User)
-        private readonly usersRepository:Repository<User>
+        private readonly usersRepository:Repository<User>,
+
+        @Inject(profileConfig.KEY)
+        private readonly profileConfigration:config.ConfigType<typeof profileConfig>,
+        /**inject config service */
+        private readonly configService: config.ConfigService
     ){
 
     }
@@ -38,6 +45,7 @@ export class UsersService {
      * getAll method retrieves all users or a specific user by ID based on the provided parameters. It accepts a GetUsersParamDto object, a limit for pagination, and a page number. The method returns an array of user objects.
      */
     public getAll(getUsersParamDto :GetUsersParamDto,limit :number,page:number){
+        console.log(this.profileConfigration.key)
         
         return[
             {

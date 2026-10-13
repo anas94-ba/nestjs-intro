@@ -2,13 +2,16 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { PostType } from './enums/postType.enum';
 import { PostStatus } from './enums/postStatus.enum';
-import { CreatePostMetaOptionDto } from './dtos/create-post-meta-option.dto';
+import { CreatePostMetaOptionDto } from '../meta-options/dtos/create-post-meta-option.dto';
+import { MetaOption } from '../meta-options/meta-option.entity';
 
 
 @Entity()
@@ -40,11 +43,12 @@ export class Post{
   @Column({ type: 'timestamp', nullable: true })
   publishedOn?: Date;
 
+  @OneToOne(()=>MetaOption)
+  @JoinColumn()
+  metaOptions?:MetaOption;
+
 
   tags?: string[];
-
-
-  metaOptions?:CreatePostMetaOptionDto[];
 
 
 }
