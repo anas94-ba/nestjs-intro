@@ -5,12 +5,13 @@ import { AuthModule } from '../auth/auth.module.js';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user.entity.js';
 import { ConfigModule } from '@nestjs/config';
+import { UsersCreateManyProvider } from './Providers/users-create-many.provider.js';
 import profileConfig from './config/profile.config.js';
 
 
 @Module({
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, UsersCreateManyProvider],
   imports: [
     forwardRef(() => AuthModule),
     ConfigModule.forFeature(profileConfig),

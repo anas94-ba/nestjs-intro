@@ -2,13 +2,14 @@ import { Injectable,Inject,forwardRef, RequestTimeoutException, BadRequestExcept
 import { GetUsersParamDto } from '../dtos/get-users-params.dto.js';
 import { AuthService } from '../../auth/providers/auth.service.js';
 import { User } from '../user.entity.js';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from '../dtos/create-user.dto.js';
 import * as config from '@nestjs/config';
 import profileConfig from '../config/profile.config.js';
 import { PatchPostDto } from '../../posts/dtos/patch-post.dto.js';
 import { PatchUserDto } from '../dtos/patch-user.dto.js';
+import { UsersCreateManyProvider } from './users-create-many.provider.js';
 
 /**
  * The UsersService class is responsible for handling user-related operations in the application. It provides methods to retrieve all users, find a user by ID, and search for users based on a text query. The service also interacts with the AuthService to check authentication status when searching for users.
@@ -29,7 +30,10 @@ export class UsersService {
         @Inject(profileConfig.KEY)
         private readonly profileConfigration:config.ConfigType<typeof profileConfig>,
         /**inject config service */
-        private readonly configService: config.ConfigService
+        private readonly configService: config.ConfigService,
+
+        private readonly dataSource:DataSource,
+        private readonly UsersCreateManyProviders:UsersCreateManyProvider,
     ){
 
     }
@@ -116,4 +120,8 @@ export class UsersService {
             }
         ]
     }
+    public async createManyProvider(createUserDto:CreateUserDto[]){
+        return await this.UsersCreateManyProviders.createMany(createUserDto);
+    }
+    
 }
