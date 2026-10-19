@@ -6,12 +6,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user.entity.js';
 import { ConfigModule } from '@nestjs/config';
 import { UsersCreateManyProvider } from './Providers/users-create-many.provider.js';
+import { CreateUserProvider } from './Providers/create-user.provider';
+import { FindOneUserByEmailProvider } from './Providers/find-one-user-by-email.provider.js';
 import profileConfig from './config/profile.config.js';
 
 
 @Module({
   controllers: [UsersController],
-  providers: [UsersService, UsersCreateManyProvider],
+  providers: [UsersService, UsersCreateManyProvider, CreateUserProvider, FindOneUserByEmailProvider],
   imports: [
     forwardRef(() => AuthModule),
     ConfigModule.forFeature(profileConfig),

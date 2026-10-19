@@ -10,6 +10,8 @@ import profileConfig from '../config/profile.config.js';
 import { PatchPostDto } from '../../posts/dtos/patch-post.dto.js';
 import { PatchUserDto } from '../dtos/patch-user.dto.js';
 import { UsersCreateManyProvider } from './users-create-many.provider.js';
+import { CreateUserProvider } from './create-user.provider.js';
+import { FindOneUserByEmailProvider } from './find-one-user-by-email.provider.js';
 
 /**
  * The UsersService class is responsible for handling user-related operations in the application. It provides methods to retrieve all users, find a user by ID, and search for users based on a text query. The service also interacts with the AuthService to check authentication status when searching for users.
@@ -34,42 +36,14 @@ export class UsersService {
 
         private readonly dataSource:DataSource,
         private readonly UsersCreateManyProviders:UsersCreateManyProvider,
+        private readonly createUserProvider:CreateUserProvider,
+        private readonly findOneUserByEmailProvider:FindOneUserByEmailProvider,
     ){
 
     }
 
     public async createUser(createUserDto:CreateUserDto){
-        let existingUser = undefined;
-
-        try{
-           existingUser=await this.usersRepository.findOne({where:{email:createUserDto.email}});
-        }catch(error){
-            throw new RequestTimeoutException(
-                "Unable to connect to database ,please try in another time",
-                {
-                    description:"unable to connect to db"
-                }
-            )
-        }
-        if(existingUser){
-            throw new BadRequestException(
-                "User already exist please,check your email"
-            );
-        }
-        let newUser=this.usersRepository.create(createUserDto);
-        try{
-            newUser=await this.usersRepository.save(newUser);
-
-        }catch(error){
-            throw new RequestTimeoutException(
-                "Unable to connect to database ,please try in another time",
-                 {
-                    description:"unable to connect to db"
-                }
-            )
-        }
-        
-        return newUser;
+        return this.createUserProvider.createUser(createUserDto);
 
     }
     /**
@@ -122,6 +96,10 @@ export class UsersService {
     }
     public async createManyProvider(createUserDto:CreateUserDto[]){
         return await this.UsersCreateManyProviders.createMany(createUserDto);
+    }
+    public async findOneByEmail(email:string){
+        return this.findOneUserByEmailProvider.findOneUserByEmail(email);
+
     }
     
 }
